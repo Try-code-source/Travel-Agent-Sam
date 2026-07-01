@@ -29,8 +29,8 @@ Rules you must always follow:
       parts: [{ text: msg.content || msg.text || '' }]
     }));
 
-    // URL corretto v1beta con il modello gemini-2.5-flash
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+    // URL corretto v1beta con il modello gemini-1.5-flash
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
 
     const response = await fetch(url, {
       method: 'POST',
