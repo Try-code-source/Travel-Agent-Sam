@@ -8,10 +8,10 @@ export default async function handler(req, res) {
 
   try {
     const { messages } = req.body;
-    const apiKey = process.env.OPENAI_API_KEY;
+    const apiKey = process.env.ANTHROPIC_API_KEY;
 
     if (!apiKey) {
-      return res.status(200).json({ reply: 'Errore: Manca la OPENAI_API_KEY su Vercel!' });
+      return res.status(200).json({ reply: 'Errore: Manca la ANTHROPIC_API_KEY su Vercel!' });
     }
 
     const SYSTEM_PROMPT = `You are an expert Travel Assistant called "SAM".
@@ -22,35 +22,28 @@ Rules you must always follow:
 4. At the end of every response, include 1-2 helpful and real clickable links (use Markdown format: [Label](URL)).
 5. When the user describes their travel preferences, react with a warm personal connection phrase like "Fantastic! We have the same preferences! 🙌" or "We're very similar! I love that too! 😄".`;
 
-    // Mappiamo i messaggi nel formato richiesto da OpenAI
-    const openAIMessages = [
-      { role: 'system', content: SYSTEM_PROMPT },
-      ...messages.map(msg => ({
-        role: msg.role === 'user' ? 'user' : 'assistant',
-        content: msg.content || (msg.text || '')
-      }))
-    ];
-
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01'
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        messages: openAIMessages,
-        max_tokens: 1000
+        model: 'claude-3-haiku-20240307', // Modello leggero che accetta i crediti free
+        max_tokens: 1000,
+        system: SYSTEM_PROMPT,
+        messages: messages
       })
     });
 
     const data = await response.json();
-
+    
     if (data.error) {
-      return res.status(200).json({ reply: `Errore OpenAI: ${data.error.message}` });
+      return res.status(200).json({ reply: `Errore Anthropic: ${data.error.message || JSON.stringify(data.error)}` });
     }
 
-    const reply = data.choices?.[0]?.message?.content || "Errore: Risposta vuota da OpenAI.";
+    const reply = data.content?.map(b => b.text || '').join('') || "Errore: Risposta vuota da Anthropic.";
 
     return res.status(200).json({ reply });
   } catch (error) {
