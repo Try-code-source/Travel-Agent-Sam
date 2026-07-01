@@ -23,32 +23,22 @@ Rules you must always follow:
 5. When the user describes their travel preferences, react with a warm personal connection phrase like "Fantastic! We have the same preferences! 🙌" or "We're very similar! I love that too! 😄".
 6. Always end your response with an engaging question to keep the conversation going and learn more about the user's travel plans.`;
 
-    // Cronologia con istruzioni incluse per massima compatibilità v1
-    const contents = [
-      {
-        role: 'user',
-        parts: [{ text: `System Instruction: ${SYSTEM_PROMPT}\n\nNow acknowledge this and reply to the user's next message accordingly.` }]
-      },
-      {
-        role: 'model',
-        parts: [{ text: "Understood. I am SAM, your expert Travel Assistant. I will follow all instructions perfectly." }]
-      }
-    ];
+    // Formato messaggi standard per Gemini v1
+    const contents = messages.map(msg => ({
+      role: msg.role === 'user' ? 'user' : 'model',
+      parts: [{ text: msg.content || msg.text || '' }]
+    }));
 
-    messages.forEach(msg => {
-      contents.push({
-        role: msg.role === 'user' ? 'user' : 'model',
-        parts: [{ text: msg.content || msg.text || '' }]
-      });
-    });
-
-    // Endpoint v1 stabile con alias corretto "gemini-1.5-flash-latest"
-    const url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`;
+    // Endpoint ufficiale v1 con il modello supportato gemini-2.5-flash
+    const url = `https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
 
     const response = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ contents: contents })
+      body: JSON.stringify({
+        contents: contents,
+        systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] } // Supportato nativamente su 2.5
+      })
     });
 
     const data = await response.json();
