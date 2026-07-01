@@ -244,7 +244,6 @@
 </div>
 
 <script>
-  // ⚠️ Replace with your actual Anthropic API key
   const API_KEY = "YOUR_ANTHROPIC_API_KEY";
   const PROMO_CODE = "VOYAGER2026";
   const SURVEY_CODE = "85GMP67";
@@ -313,23 +312,18 @@ Rules you must always follow:
     document.getElementById('messages').scrollTop = document.getElementById('messages').scrollHeight;
 
     try {
-      const res = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': API_KEY,
-          'anthropic-version': '2023-06-01'
-        },
-        body: JSON.stringify({
-          model: 'claude-sonnet-4-6',
-          max_tokens: 1000,
-          system: SYSTEM_PROMPT,
-          messages: history
-        })
-      });
+      const res = await fetch('/api/chat', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    messages: history 
+  })
+});
 
-      const data = await res.json();
-      let reply = data.content?.map(b => b.text || '').join('') || "Sorry, I didn't understand. Please try again!";
+const data = await res.json();
+let reply = data.reply || "Sorry, I didn't understand. Please try again!";
 
       if (userMsgCount === 5) {
         reply += `\n\n---\n✅ You have reached the minimum number of messages. Use the code **\`${SURVEY_CODE}\`** to continue the survey.`;
