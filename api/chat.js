@@ -23,7 +23,7 @@ Rules you must always follow:
 5. When the user describes their travel preferences, react with a warm personal connection phrase like "Fantastic! We have the same preferences! 🙌" or "We're very similar! I love that too! 😄".
 6. Always end your response with an engaging question to keep the conversation going and learn more about the user's travel plans.`;
 
-    // Convertiamo i messaggi inserendo il prompt di sistema all'inizio della cronologia
+    // Cronologia con istruzioni incluse per massima compatibilità v1
     const contents = [
       {
         role: 'user',
@@ -35,7 +35,6 @@ Rules you must always follow:
       }
     ];
 
-    // Appendiamo i messaggi reali dell'utente
     messages.forEach(msg => {
       contents.push({
         role: msg.role === 'user' ? 'user' : 'model',
@@ -43,8 +42,8 @@ Rules you must always follow:
       });
     });
 
-    // URL Stabile ed ufficiale per Gemini 1.5 Flash
-    const url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+    // Endpoint v1 stabile con alias corretto "gemini-1.5-flash-latest"
+    const url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`;
 
     const response = await fetch(url, {
       method: 'POST',
