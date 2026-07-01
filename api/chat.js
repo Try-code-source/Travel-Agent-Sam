@@ -11,7 +11,7 @@ export default async function handler(req, res) {
     const apiKey = process.env.ANTHROPIC_API_KEY;
 
     if (!apiKey) {
-      return res.status(500).json({ error: 'Server configuration error (Missing API Key)' });
+      return res.status(200).json({ reply: 'Errore: Manca la ANTHROPIC_API_KEY su Vercel!' });
     }
 
     const SYSTEM_PROMPT = `You are an expert Travel Assistant called "SAM".
@@ -38,10 +38,16 @@ Rules you must always follow:
     });
 
     const data = await response.json();
-    const reply = data.content?.map(b => b.text || '').join('') || "No response text received.";
+    
+    // Se Anthropic sputa un errore, lo stampiamo direttamente nella chat!
+    if (data.error) {
+      return res.status(200).json({ reply: `Errore Anthropic: ${data.error.message || JSON.stringify(data.error)}` });
+    }
+
+    const reply = data.content?.map(b => b.text || '').join('') || "Errore: Risposta vuota da Anthropic.";
 
     return res.status(200).json({ reply });
   } catch (error) {
-    return res.status(500).json({ error: error.message });
+    return res.status(200).json({ reply: `Errore Server: ${error.message}` });
   }
 }
