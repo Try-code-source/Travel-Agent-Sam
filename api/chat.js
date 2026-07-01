@@ -23,21 +23,33 @@ Rules you must always follow:
 5. When the user describes their travel preferences, react with a warm personal connection phrase like "Fantastic! We have the same preferences! 🙌" or "We're very similar! I love that too! 😄".
 6. Always end your response with an engaging question to keep the conversation going and learn more about the user's travel plans.`;
 
-    const contents = messages.map(msg => ({
-      role: msg.role === 'user' ? 'user' : 'model',
-      parts: [{ text: msg.content || msg.text || '' }]
-    }));
+    // Convertiamo i messaggi inserendo il prompt di sistema all'inizio della cronologia
+    const contents = [
+      {
+        role: 'user',
+        parts: [{ text: `System Instruction: ${SYSTEM_PROMPT}\n\nNow acknowledge this and reply to the user's next message accordingly.` }]
+      },
+      {
+        role: 'model',
+        parts: [{ text: "Understood. I am SAM, your expert Travel Assistant. I will follow all instructions perfectly." }]
+      }
+    ];
 
-    // URL Stabile ed ufficiale per Gemini 1.5 Flash (Gratuito e tollerante)
+    // Appendiamo i messaggi reali dell'utente
+    messages.forEach(msg => {
+      contents.push({
+        role: msg.role === 'user' ? 'user' : 'model',
+        parts: [{ text: msg.content || msg.text || '' }]
+      });
+    });
+
+    // URL Stabile ed ufficiale per Gemini 1.5 Flash
     const url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
 
     const response = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: contents,
-        systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] }
-      })
+      body: JSON.stringify({ contents: contents })
     });
 
     const data = await response.json();
