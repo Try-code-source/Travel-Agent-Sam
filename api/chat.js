@@ -11,7 +11,7 @@ export default async function handler(req, res) {
     const apiKey = process.env.GEMINI_API_KEY;
 
     if (!apiKey) {
-      return res.status(200).json({ reply: 'Errore: Manca la GEMINI_API_KEY su Vercel!' });
+      return res.status(200).json({ reply: 'Errore: Manca la GEMINI_API_KEY su Vercel!' }); 
     }
 
     const SYSTEM_PROMPT = `You are an expert Travel Assistant called "SAM".
